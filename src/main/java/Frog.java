@@ -17,56 +17,64 @@ public class Frog implements Runnable {
 
 	@Override
 	public void run() {
-		// Check to first cell is free
-		if (frogIndex > 0) {
-			while (positions[frogIndex - 1] == 0 && !finished[frogIndex - 1]) {
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
+		try {
+			// Check if the first cell is free
+			if (frogIndex > 0) {
+				while (positions[frogIndex - 1] == 0 && !finished[frogIndex - 1]) {
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+						throw new FrogRaceException("Thread was interrupted for frog " + (frogIndex + 1));
+					}
 				}
 			}
-		}
 
-		while (true) {
-			lock.lock();
-			try {
-				// Try to jump
-				if (frogIndex == 0 || positions[frogIndex - 1] > 0 || finished[frogIndex - 1]) {
-					int nextPosition = positions[frogIndex] + 1;
-					if (nextPosition == numCells) {
-						System.out.println("Frog " + (frogIndex + 1) + " is finished!");
-						finished[frogIndex] = true;
-						positions[frogIndex] = -1; // Delete a frog if it's finished
-						break;
-					}
-
-					boolean positionOccupied = false;
-					for (int j = 0; j < positions.length; j++) {
-						if (j != frogIndex && positions[j] == nextPosition && !finished[j]) {
-							positionOccupied = true;
+			while (true) {
+				lock.lock();
+				try {
+					// Try to jump
+					if (frogIndex == 0 || positions[frogIndex - 1] > 0 || finished[frogIndex - 1]) {
+						int nextPosition = positions[frogIndex] + 1;
+						if (nextPosition == numCells) {
+							System.out.println("Frog " + (frogIndex + 1) + " is finished!");
+							finished[frogIndex] = true;
+							positions[frogIndex] = -1; // Delete a frog if it's finished
 							break;
 						}
-					}
 
-					if (!positionOccupied) {
-						positions[frogIndex] = nextPosition;
-						Circle.printPositions(positions, finished);
+						boolean positionOccupied = false;
+						for (int j = 0; j < positions.length; j++) {
+							if (j != frogIndex && positions[j] == nextPosition && !finished[j]) {
+								positionOccupied = true;
+								break;
+							}
+						}
+
+						if (!positionOccupied) {
+							positions[frogIndex] = nextPosition;
+							Circle.printPositions(positions, finished);
+						}
 					}
+				} finally {
+					lock.unlock();
 				}
-			} finally {
-				lock.unlock();
-			}
-			if (finished[frogIndex]) {
-				break;
-			}
+				if (finished[frogIndex]) {
+					break;
+				}
 
-			try {
-				// For imitate rounds
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
+				try {
+					//throw new InterruptedException();
+					// For imitate rounds
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					throw new FrogRaceException("Thread was interrupted for frog " + (frogIndex + 1));
+				}
 			}
+		} catch (FrogRaceException e) {
+			System.err.println(e.getMessage());
 		}
 	}
 }
+

@@ -8,15 +8,14 @@ public class CircleFrog {
 	public static int round = 1;
 
 	public static void main(String[] args) {
-		int numFrogs;
-		int numCells;
+		int numFrogs = 0;
+		int numCells = 0;
 
 		// Reading config file
 		Properties properties = new Properties();
 		try (InputStream input = CircleFrog.class.getClassLoader().getResourceAsStream("config.properties")) {
 			if (input == null) {
-				System.out.println("Sorry, unable to find config.properties");
-				return;
+				throw new ConfigurationException("Sorry, unable to find config.properties");
 			}
 			properties.load(input);
 			numFrogs = Integer.parseInt(properties.getProperty("num_frogs"));
@@ -24,6 +23,9 @@ public class CircleFrog {
 		} catch (IOException e) {
 			e.printStackTrace();
 			return;
+		}
+		catch (ConfigurationException ex){
+			System.err.println(ex.getMessage());
 		}
 
 		Lock lock = new ReentrantLock();
