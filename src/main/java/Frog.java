@@ -1,80 +1,54 @@
-import java.util.concurrent.locks.Lock;
-
 public class Frog implements Runnable {
-	private int frogIndex;
-	private int[] positions;
-	private boolean[] finished;
-	private int numCells;
-	private Lock lock;
+	private final int frogIndex;
+	private final int speed;
+	private int position;
+	private boolean finished;
 
-	public Frog(int frogIndex, int[] positions, boolean[] finished, int numCells, Lock lock) {
+	public Frog(int frogIndex, int speed) {
 		this.frogIndex = frogIndex;
-		this.positions = positions;
-		this.finished = finished;
-		this.numCells = numCells;
-		this.lock = lock;
+		this.speed = speed;
+		this.position = 0;
+		this.finished = false;
+	}
+
+	public int getFrogIndex() {
+		return frogIndex;
+	}
+
+	public int getPosition() {
+		return position;
+	}
+
+	public boolean isFinished() {
+		return finished;
+	}
+
+	public void jump() {
+		if (!finished) {
+			position += speed;
+		}
+	}
+
+	public void finish() {
+		finished = true;
 	}
 
 	@Override
 	public void run() {
-		try {
-			// Check if the first cell is free
-			if (frogIndex > 0) {
-				while (positions[frogIndex - 1] == 0 && !finished[frogIndex - 1]) {
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-						Thread.currentThread().interrupt();
-						throw new FrogRaceException("Thread was interrupted for frog " + (frogIndex + 1));
-					}
-				}
+		while (!finished) {
+			try {
+				Thread.sleep(1000);
+				jump();
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				System.err.println("Thread was interrupted for frog " + (frogIndex + 1));
+				return;
 			}
-
-			while (true) {
-				lock.lock();
-				try {
-					// Try to jump
-					if (frogIndex == 0 || positions[frogIndex - 1] > 0 || finished[frogIndex - 1]) {
-						int nextPosition = positions[frogIndex] + 1;
-						if (nextPosition == numCells) {
-							System.out.println("Frog " + (frogIndex + 1) + " is finished!");
-							finished[frogIndex] = true;
-							positions[frogIndex] = -1; // Delete a frog if it's finished
-							break;
-						}
-
-						boolean positionOccupied = false;
-						for (int j = 0; j < positions.length; j++) {
-							if (j != frogIndex && positions[j] == nextPosition && !finished[j]) {
-								positionOccupied = true;
-								break;
-							}
-						}
-
-						if (!positionOccupied) {
-							positions[frogIndex] = nextPosition;
-							Circle.printPositions(positions, finished);
-						}
-					}
-				} finally {
-					lock.unlock();
-				}
-				if (finished[frogIndex]) {
-					break;
-				}
-
-				try {
-					//throw new InterruptedException();
-					// For imitate rounds
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-					throw new FrogRaceException("Thread was interrupted for frog " + (frogIndex + 1));
-				}
-			}
-		} catch (FrogRaceException e) {
-			System.err.println(e.getMessage());
 		}
+	}
+
+	public int getSpeed() {
+		return speed;
 	}
 }
 

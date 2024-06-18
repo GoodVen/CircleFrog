@@ -1,12 +1,10 @@
+
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class CircleFrog {
-	public static int round = 1;
-
 	public static void main(String[] args) {
 		int numFrogs = 0;
 		int numCells = 0;
@@ -27,9 +25,15 @@ public class CircleFrog {
 		catch (ConfigurationException ex){
 			System.err.println(ex.getMessage());
 		}
-
-		Lock lock = new ReentrantLock();
-		Circle circle = new Circle(numFrogs, numCells, lock);
-		circle.start();
+		//initialize circle and frog, set frog speed
+		Circle circle = new Circle(numCells);
+		Frog[] frogs = new Frog[numFrogs];
+		for (int i = 0; i < numFrogs; i++) {
+			//frog speed
+			frogs[i] = new Frog(i, 2);
+		}
+		//Simulation
+		Simulator simulator = new Simulator(circle, frogs);
+		simulator.startSimulation();
 	}
 }
