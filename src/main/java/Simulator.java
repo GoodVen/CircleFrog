@@ -1,92 +1,76 @@
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class Simulator {
-	private Circle circle;
-	private Frog[] frogs;
+	private final GameTable circle;
+	private final Frog[] frogs;
 	private static int round = 1;
 
-	public Simulator(Circle circle, Frog[] frogs) {
+	public Simulator(GameTable circle, Frog[] frogs) {
 		this.circle = circle;
 		this.frogs = frogs;
+		for (Frog frog : frogs) {
+			circle.addFrog(frog);
+		}
 	}
 
 	public void startSimulation() {
 		ExecutorService executorService = Executors.newFixedThreadPool(frogs.length);
-		for (Frog frog : frogs) {
+
+		for (int i = 0; i < frogs.length; i++) {
+			int index = i;
 			executorService.execute(() -> {
 				try {
-					while (!frog.isFinished()) {
-						attemptJump(frog);
-						Thread.sleep(1000);
-					}
-				} catch (InterruptedException | FrogRaceException e) {
-					Thread.currentThread().interrupt();
-					System.err.println(e.getMessage());
-				}
-			});
-		}
-		executorService.shutdown();
-		while (!executorService.isTerminated()) {
-			// Wait for all tasks to finish
-		}
-	}
-
-	private void attemptJump(Frog frog) throws InterruptedException, FrogRaceException {
-		boolean jumped = false;
-		int frogIndex = frog.getFrogIndex();
-
-		// Ensure previous frog has moved from start position
-		if (frogIndex > 0) {
-			while (frogs[frogIndex - 1].getPosition() == 0 && !frogs[frogIndex - 1].isFinished()) {
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-					throw new FrogRaceException("Thread was interrupted for frog " + (frogIndex + 1));
-				}
-			}
-		}
-
-		while (true) {
-			circle.getLock().lock();
-			try {
-				// Try to jump
-				if (frogIndex == 0 || frogs[frogIndex - 1].getPosition() > 0 || frogs[frogIndex - 1].isFinished()) {
-					int nextPosition = frog.getPosition() + frog.getSpeed();
-					if (nextPosition >= circle.getNumCells()) {
-						System.out.println("Frog " + (frogIndex + 1) + " is finished!");
-						frog.finish();
-						printPositions();
-						return;
-					}
-
-					boolean positionOccupied = false;
-					for (Frog otherFrog : frogs) {
-						if (otherFrog != frog && otherFrog.getPosition() == nextPosition && !otherFrog.isFinished()) {
-							positionOccupied = true;
-							break;
+					if (index > 0) {
+						// Ensure previous frog has moved from start position
+						while (frogs[index - 1].getPosition() == 0 && !frogs[index - 1].isFinished()) {
+							try {
+								Thread.sleep(100);
+							} catch (InterruptedException e) {
+								Thread.currentThread().interrupt();
+								System.err.println("Thread interrupted");
+							}
 						}
 					}
 
-					if (!positionOccupied) {
-						frog.jump();
-						printPositions();
-						jumped = true;
-					} else {
-						System.out.println("Frog " + (frogIndex + 1) + " attempted to jump to an occupied position! Waiting for next round...");
-						printPositions();
-					}
-				}
-			} finally {
-				circle.getLock().unlock();
-			}
+					while (!frogs[index].isFinished()) {
+						synchronized (circle.getLock()) {
+							if (circle.canJump(frogs[index])) {
+								circle.moveFrog(frogs[index]);
 
-			if (!jumped) {
-				Thread.sleep(500); // wait before trying again
-			} else {
-				break; // exit loop if frog successfully jumped
-			}
+								Thread.sleep(500);
+								printPositions(); // Print positions after this frog has jumped
+							} else {
+								System.out.println("Frog " + (frogs[index].getFrogIndex() + 1) + " is waiting...");
+								Thread.sleep(1000); // Ожидание, если лягушка не может прыгнуть
+							}
+						}
+
+						// Check if the frog has finished the race
+						if (frogs[index].isFinished()) {
+							System.out.println("Frog " + (frogs[index].getFrogIndex() + 1) + " has finished the race and is exiting...");
+							synchronized (circle.getLock()) {
+								circle.getFrogs().remove(frogs[index]);
+							}
+							break; // Exit the loop and terminate the thread
+						}
+					}
+
+				} catch (Exception e) {
+					Thread.currentThread().interrupt();
+					System.err.println("Thread interrupted");
+				}
+			});
+		}
+
+		executorService.shutdown();
+
+		try {
+			executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			System.err.println("Thread interrupted during termination");
 		}
 	}
 

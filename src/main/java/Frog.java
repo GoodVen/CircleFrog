@@ -1,13 +1,14 @@
 public class Frog implements Runnable {
+
 	private final int frogIndex;
-	//add name of the frog
+	private final String name;
 	private final int speed;
 	private int position;
-	//Frog should/May know about GameTable
 	private boolean finished;
 
 	public Frog(int frogIndex, int speed) {
 		this.frogIndex = frogIndex;
+		this.name = "Frog " + (frogIndex + 1);
 		this.speed = speed;
 		this.position = 0;
 		this.finished = false;
@@ -17,8 +18,16 @@ public class Frog implements Runnable {
 		return frogIndex;
 	}
 
+	public String getName(){
+		return name;
+	}
+
 	public int getPosition() {
 		return position;
+	}
+
+	public void setPosition(int position) {
+		this.position = position;
 	}
 
 	public boolean isFinished() {
@@ -52,6 +61,11 @@ public class Frog implements Runnable {
 				return;
 			}
 		}
+	}
+
+	@Override
+	public String toString() {
+		return name + " (position: " + position + ", finished: " + finished + ")";
 	}
 
 	public int getSpeed() {

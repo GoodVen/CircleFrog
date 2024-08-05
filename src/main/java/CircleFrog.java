@@ -26,14 +26,14 @@ public class CircleFrog {
 			System.err.println(ex.getMessage());
 		}
 		//initialize circle and frog, set frog speed
-		Circle circle = new Circle(numCells);
+		GameTable gameTable = new GameTable(numCells);
 		Frog[] frogs = new Frog[numFrogs];
 		for (int i = 0; i < numFrogs; i++) {
 			//frog speed
-			frogs[i] = new Frog(i, 2);
+			frogs[i] = new Frog(i, 1);
 		}
 		//Simulation
-		Simulator simulator = new Simulator(circle, frogs);
+		Simulator simulator = new Simulator(gameTable, frogs);
 		simulator.startSimulation();
 	}
 }
