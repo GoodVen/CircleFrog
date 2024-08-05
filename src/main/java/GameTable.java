@@ -18,10 +18,6 @@ public class GameTable {
 		return lock;
 	}
 
-	public int getNumCells() {
-		return numCells;
-	}
-
 	public void addFrog(Frog frog) {
 		frogs.add(frog);
 	}
@@ -30,7 +26,7 @@ public class GameTable {
 		return frogs;
 	}
 
-	private boolean canJump(Frog frog) {
+	public boolean canJump(Frog frog) {
 		int frogIndex = frog.getFrogIndex();
 		int nextPosition = frog.getPosition() + frog.getSpeed();
 
@@ -46,29 +42,18 @@ public class GameTable {
 			}
 		}
 
-		// Ensure previous frog has moved from start position if applicable
-		if (frogIndex > 0) {
-			if (frogs.get(frogIndex - 1).getPosition() == 0 && !frogs.get(frogIndex - 1).isFinished()) {
-				return false;
-			}
-		}
-
 		return true;
 	}
 
-	public boolean moveFrog(Frog frog) {
+	public void moveFrog(Frog frog) {
 		lock.lock();
 		try {
-			if (canJump(frog)) {
-				int nextPosition = frog.getPosition() + frog.getSpeed();
-				if (nextPosition >= numCells - 1) {
-					frog.finish();
-				} else {
-					frog.setPosition(nextPosition);
-				}
-				return true;
+			int nextPosition = frog.getPosition() + frog.getSpeed();
+			if (nextPosition >= numCells - 1) {
+				frog.finish();
+			} else {
+				frog.setPosition(nextPosition);
 			}
-			return false;
 		} finally {
 			lock.unlock();
 		}
@@ -77,8 +62,9 @@ public class GameTable {
 
 
 
-// no need for this field just use List of Objects/Frog/Or list of generics
 
 
-	//Add method move that will use lock to move frog from i to j
+
+
+
 

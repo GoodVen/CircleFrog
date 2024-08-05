@@ -1,10 +1,10 @@
 public class Frog implements Runnable {
-
 	private final int frogIndex;
 	private final String name;
 	private final int speed;
 	private int position;
 	private boolean finished;
+	private GameTable gameTable;
 
 	public Frog(int frogIndex, int speed) {
 		this.frogIndex = frogIndex;
@@ -14,11 +14,15 @@ public class Frog implements Runnable {
 		this.finished = false;
 	}
 
+	public void setGameTable(GameTable gameTable) {
+		this.gameTable = gameTable;
+	}
+
 	public int getFrogIndex() {
 		return frogIndex;
 	}
 
-	public String getName(){
+	public String getName() {
 		return name;
 	}
 
@@ -34,30 +38,23 @@ public class Frog implements Runnable {
 		return finished;
 	}
 
-	public void jump() {
-		if (!finished) {
-			position += speed;
-		}
-	}
-
 	public void finish() {
 		finished = true;
-	}
-
-	public String reportPosition() {
-		if (!finished) {
-			return name + " in " + position + " cell";
-		} else {
-			return name + " has finished!";
-		}
 	}
 
 	@Override
 	public void run() {
 		while (!finished) {
 			try {
-				jump();
-				Thread.sleep(1000); // время между прыжками
+				synchronized (gameTable.getLock()) {
+					if (gameTable.canJump(this)) {
+						gameTable.moveFrog(this);
+						System.out.println(name + " jumped to position " + position);
+					} else {
+						System.out.println(name + " is waiting...");
+					}
+				}
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 				System.err.println("Thread was interrupted for frog " + (frogIndex + 1));
@@ -66,14 +63,10 @@ public class Frog implements Runnable {
 		}
 	}
 
-	@Override
-	public String toString() {
-		return name + " (position: " + position + ", finished: " + finished + ")";
-	}
-
 	public int getSpeed() {
 		return speed;
 	}
 }
+
 
 

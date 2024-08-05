@@ -3,15 +3,16 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class Simulator {
-	private final GameTable circle;
+	private final GameTable gameTable;
 	private final Frog[] frogs;
 	private static int round = 1;
 
-	public Simulator(GameTable circle, Frog[] frogs) {
-		this.circle = circle;
+	public Simulator(GameTable gameTable, Frog[] frogs) {
+		this.gameTable = gameTable;
 		this.frogs = frogs;
 		for (Frog frog : frogs) {
-			circle.addFrog(frog);
+			frog.setGameTable(gameTable);
+			gameTable.addFrog(frog);
 		}
 	}
 
@@ -24,7 +25,7 @@ public class Simulator {
 				try {
 					if (index > 0) {
 						// Ensure previous frog has moved from start position
-						while (frogs[index - 1].getPosition() == 0 && !frogs[index - 1].isFinished()) {
+						while (index > 0 && frogs[index - 1].getPosition() == 0 && !frogs[index - 1].isFinished()) {
 							try {
 								Thread.sleep(100);
 							} catch (InterruptedException e) {
@@ -35,17 +36,16 @@ public class Simulator {
 					}
 
 					while (!frogs[index].isFinished()) {
-						if (circle.moveFrog(frogs[index])) {
-							Thread.sleep(500); // Задержка перед следующей попыткой
-							printPositions(); // Print positions after this frog has jumped
-						} else {
-							System.out.println("Frog " + (frogs[index].getFrogIndex() + 1) + " is waiting...");
-							Thread.sleep(1000); // Ожидание, если лягушка не может прыгнуть
-						}
+
+						frogs[index].run();
+						//printPositions();
 
 						// Check if the frog has finished the race
 						if (frogs[index].isFinished()) {
-							System.out.println("Frog " + (frogs[index].getFrogIndex() + 1) + " has finished the race and is exiting...");
+							System.out.println(frogs[index].getName() + " has finished the race and is exiting...");
+							synchronized (gameTable.getLock()) {
+								gameTable.getFrogs().remove(frogs[index]);
+							}
 							break; // Exit the loop and terminate the thread
 						}
 					}
@@ -53,7 +53,7 @@ public class Simulator {
 				} catch (Exception e) {
 					Thread.currentThread().interrupt();
 					System.err.println("Thread interrupted");
-				}
+									}
 			});
 		}
 
@@ -67,13 +67,19 @@ public class Simulator {
 		}
 	}
 
-	private void printPositions() {
-		System.out.println("Round № " + round);
-		for (Frog frog : frogs) {
-			System.out.println(frog.reportPosition());
-		}
-		round++;
-		System.out.println();
-	}
+	//private void printPositions() {
+		//System.out.println("Round № " + round);
+		//for (Frog frog : frogs) {
+			//if (frog.getPosition() > 0 || frog.isFinished()) {
+				//if (!frog.isFinished()) {
+					//System.out.println(frog.getName() + " in " + frog.getPosition() + " cell");
+				//} else {
+					//System.out.println(frog.getName() + " is finished!");
+				//}
+			//}
+		//}
+		//round++;
+		//System.out.println();
+	//}
 }
 
