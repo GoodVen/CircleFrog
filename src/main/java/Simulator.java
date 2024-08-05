@@ -35,23 +35,17 @@ public class Simulator {
 					}
 
 					while (!frogs[index].isFinished()) {
-						synchronized (circle.getLock()) {
-							if (circle.canJump(frogs[index])) {
-								circle.moveFrog(frogs[index]);
-								Thread.sleep(500); // Задержка перед следующей попыткой
-								printPositions();
-							} else {
-								System.out.println("Frog " + (frogs[index].getFrogIndex() + 1) + " is waiting...");
-								Thread.sleep(1000); // Ожидание, если лягушка не может прыгнуть
-							}
+						if (circle.moveFrog(frogs[index])) {
+							Thread.sleep(500); // Задержка перед следующей попыткой
+							printPositions(); // Print positions after this frog has jumped
+						} else {
+							System.out.println("Frog " + (frogs[index].getFrogIndex() + 1) + " is waiting...");
+							Thread.sleep(1000); // Ожидание, если лягушка не может прыгнуть
 						}
 
 						// Check if the frog has finished the race
 						if (frogs[index].isFinished()) {
 							System.out.println("Frog " + (frogs[index].getFrogIndex() + 1) + " has finished the race and is exiting...");
-							synchronized (circle.getLock()) {
-								circle.getFrogs().remove(frogs[index]);
-							}
 							break; // Exit the loop and terminate the thread
 						}
 					}
@@ -82,3 +76,4 @@ public class Simulator {
 		System.out.println();
 	}
 }
+
