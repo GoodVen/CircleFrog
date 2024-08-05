@@ -38,9 +38,8 @@ public class Simulator {
 						synchronized (circle.getLock()) {
 							if (circle.canJump(frogs[index])) {
 								circle.moveFrog(frogs[index]);
-
-								Thread.sleep(500);
-								printPositions(); // Print positions after this frog has jumped
+								Thread.sleep(500); // Задержка перед следующей попыткой
+								printPositions();
 							} else {
 								System.out.println("Frog " + (frogs[index].getFrogIndex() + 1) + " is waiting...");
 								Thread.sleep(1000); // Ожидание, если лягушка не может прыгнуть
@@ -77,13 +76,7 @@ public class Simulator {
 	private void printPositions() {
 		System.out.println("Round № " + round);
 		for (Frog frog : frogs) {
-			if (frog.getPosition() > 0 || frog.isFinished()) {
-				if (!frog.isFinished()) {
-					System.out.println("Frog " + (frog.getFrogIndex() + 1) + " in " + frog.getPosition() + " cell");
-				} else {
-					System.out.println("Frog " + (frog.getFrogIndex() + 1) + " is finished!");
-				}
-			}
+			System.out.println(frog.reportPosition());
 		}
 		round++;
 		System.out.println();

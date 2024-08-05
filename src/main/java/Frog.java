@@ -44,17 +44,20 @@ public class Frog implements Runnable {
 		finished = true;
 	}
 
+	public String reportPosition() {
+		if (!finished) {
+			return name + " in " + position + " cell";
+		} else {
+			return name + " has finished!";
+		}
+	}
+
 	@Override
 	public void run() {
-
-		// Some one should start this thread!
 		while (!finished) {
 			try {
-				// Call to GameTable move method.
-				// Print something like "Frog With name moved from i to j
-				// Or frog With Name failed to move from i to j as J is busy.
-				Thread.sleep(1000);
 				jump();
+				Thread.sleep(1000); // время между прыжками
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 				System.err.println("Thread was interrupted for frog " + (frogIndex + 1));
@@ -72,4 +75,5 @@ public class Frog implements Runnable {
 		return speed;
 	}
 }
+
 

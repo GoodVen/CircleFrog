@@ -7,13 +7,13 @@ import java.util.List;
 public class GameTable {
 	private final int numCells;
 	private final List<Frog> frogs;
-
+	private final boolean[] cells; // Track occupied cells
 	private final Lock lock = new ReentrantLock();
 
 	public GameTable(int numCells) {
 		this.numCells = numCells;
 		this.frogs = new ArrayList<>();
-
+		this.cells = new boolean[numCells];
 	}
 
 	public Lock getLock() {
@@ -26,6 +26,7 @@ public class GameTable {
 
 	public void addFrog(Frog frog) {
 		frogs.add(frog);
+		cells[frog.getPosition()] = true; // Mark the starting position
 	}
 
 	public List<Frog> getFrogs() {
@@ -35,7 +36,6 @@ public class GameTable {
 	public boolean canJump(Frog frog) {
 		int frogIndex = frog.getFrogIndex();
 		int nextPosition = frog.getPosition() + frog.getSpeed();
-
 
 		// Ensure the next position is within bounds
 		if (nextPosition >= numCells) {
@@ -57,19 +57,18 @@ public class GameTable {
 		}
 
 		return true;
-
 	}
-
 
 	public void moveFrog(Frog frog) {
 		int nextPosition = frog.getPosition() + frog.getSpeed();
-		if (nextPosition >= numCells-1) {
+		if (nextPosition >= numCells - 1) {
 			frog.finish();
 		} else {
 			frog.setPosition(nextPosition);
 		}
 	}
 }
+
 
 
 // no need for this field just use List of Objects/Frog/Or list of generics
