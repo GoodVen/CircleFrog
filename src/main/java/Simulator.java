@@ -1,6 +1,4 @@
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class Simulator {
 	private final GameTable gameTable;
@@ -10,9 +8,10 @@ public class Simulator {
 	public Simulator(GameTable gameTable, Frog[] frogs) {
 		this.gameTable = gameTable;
 		this.frogs = frogs;
+
+		// Установка GameTable для каждой лягушки
 		for (Frog frog : frogs) {
 			frog.setGameTable(gameTable);
-			gameTable.addFrog(frog);
 		}
 	}
 
@@ -35,25 +34,23 @@ public class Simulator {
 						}
 					}
 
-					while (!frogs[index].isFinished()) {
-
-						frogs[index].run();
-						//printPositions();
-
-						// Check if the frog has finished the race
-						if (frogs[index].isFinished()) {
-							System.out.println(frogs[index].getName() + " has finished the race and is exiting...");
-							synchronized (gameTable.getLock()) {
-								gameTable.getFrogs().remove(frogs[index]);
-							}
-							break; // Exit the loop and terminate the thread
-						}
+					synchronized (gameTable.getLock()) {
+						gameTable.addFrog(frogs[index], 0);
 					}
 
+					while (!frogs[index].isFinished()) {
+						frogs[index].run();
+
+						synchronized (this) {
+							printPositions();
+							notifyAll();
+						}
+					}
 				} catch (Exception e) {
 					Thread.currentThread().interrupt();
-					System.err.println("Thread interrupted");
-									}
+					System.err.println("Can't move a frog: " + e.getMessage());
+					e.printStackTrace();
+				}
 			});
 		}
 
@@ -67,19 +64,21 @@ public class Simulator {
 		}
 	}
 
-	//private void printPositions() {
-		//System.out.println("Round № " + round);
-		//for (Frog frog : frogs) {
-			//if (frog.getPosition() > 0 || frog.isFinished()) {
-				//if (!frog.isFinished()) {
-					//System.out.println(frog.getName() + " in " + frog.getPosition() + " cell");
-				//} else {
-					//System.out.println(frog.getName() + " is finished!");
-				//}
-			//}
-		//}
-		//round++;
-		//System.out.println();
-	//}
+	private void printPositions() {
+		System.out.println("Round № " + round);
+		for (Frog frog : frogs) {
+			if (frog.getPosition() > 0 || frog.isFinished()) {
+				if (!frog.isFinished()) {
+					System.out.println(frog.getName() + " in " + frog.getPosition() + " cell");
+				} else {
+					System.out.println(frog.getName() + " is finished!");
+				}
+			}
+		}
+		round++;
+		System.out.println();
+	}
 }
+
+
 

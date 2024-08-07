@@ -44,12 +44,16 @@ public class Frog implements Runnable {
 
 	@Override
 	public void run() {
+		if (gameTable == null) {
+			throw new IllegalStateException("GameTable is not set for " + name);
+		}
+
 		while (!finished) {
 			try {
 				synchronized (gameTable.getLock()) {
 					if (gameTable.canJump(this)) {
 						gameTable.moveFrog(this);
-						System.out.println(name + " jumped to position " + position);
+						System.out.println(name + " jump to position " + position);
 					} else {
 						System.out.println(name + " is waiting...");
 					}

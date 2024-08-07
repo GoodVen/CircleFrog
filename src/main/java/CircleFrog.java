@@ -1,5 +1,4 @@
 
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -21,18 +20,17 @@ public class CircleFrog {
 		} catch (IOException e) {
 			e.printStackTrace();
 			return;
-		}
-		catch (ConfigurationException ex){
+		} catch (ConfigurationException ex) {
 			System.err.println(ex.getMessage());
 		}
-		//initialize circle and frog, set frog speed
+		// Initialize circle and frogs, set frog speed
 		GameTable gameTable = new GameTable(numCells);
 		Frog[] frogs = new Frog[numFrogs];
 		for (int i = 0; i < numFrogs; i++) {
-			//frog speed
+			// Frog speed
 			frogs[i] = new Frog(i, 1);
 		}
-		//Simulation
+		// Simulation
 		Simulator simulator = new Simulator(gameTable, frogs);
 		simulator.startSimulation();
 	}
