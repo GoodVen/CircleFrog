@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GameTable {
+	private final String name;
 	private final int numCells;
 	private final List<Frog> gameTable;
 	private final Lock lock = new ReentrantLock();
 
-	public GameTable(int numCells) {
+	public GameTable(int numCells, String name) {
+		this.name = name;
 		this.numCells = numCells;
 		this.gameTable = new ArrayList<>();
 		for (int i = 0; i < numCells; i++) {
@@ -41,6 +43,10 @@ public class GameTable {
 		} finally {
 			lock.unlock();
 		}
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	public void moveFrog(Frog frog) {

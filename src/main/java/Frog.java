@@ -53,7 +53,7 @@ public class Frog implements Runnable {
 				synchronized (gameTable.getLock()) {
 					if (gameTable.canJump(this)) {
 						gameTable.moveFrog(this);
-						System.out.println(name + " jump to position " + position);
+						System.out.println(name + " jump to position " + position + " in " + gameTable.getName());
 					} else {
 						System.out.println(name + " is waiting...");
 					}

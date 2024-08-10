@@ -24,7 +24,7 @@ public class CircleFrog {
 			System.err.println(ex.getMessage());
 		}
 		// Initialize circle and frogs, set frog speed
-		GameTable gameTable = new GameTable(numCells);
+		GameTable gameTable = new GameTable(numCells, "Board 1");
 		Frog[] frogs = new Frog[numFrogs];
 		for (int i = 0; i < numFrogs; i++) {
 			// Frog speed
